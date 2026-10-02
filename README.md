@@ -2,6 +2,8 @@
 
 A free online Lo Shu Grid calculator — the traditional Chinese numerology system based on your birth date. Enter a date of birth and instantly get your complete 3×3 Lo Shu magic-square chart with number placements and interpretations.
 
+Built by **Girish Lade** — https://ladestack.in
+
 ## Features
 
 - **Instant Lo Shu grid** from any birth date
@@ -40,7 +42,8 @@ Open `http://localhost:8000` (`index.html` is the entry point).
 
 ## Deploy Notes
 
-Static site — deployable to GitHub Pages, Netlify, Cloudflare Pages, or Vercel with zero configuration.
+Static site — deployed on GitHub Pages with zero configuration. Also deployable to Netlify,
+Cloudflare Pages, or Vercel as-is.
 
 ## License
 
@@ -48,4 +51,4 @@ CC0 1.0 Universal (public domain dedication) — see LICENSE.
 
 ---
 
-**Built by [Girish Lade](https://github.com/girishlade111)** — more free tools at [ladestack.in](https://ladestack.in)
+Built by **Girish Lade** — https://ladestack.in
