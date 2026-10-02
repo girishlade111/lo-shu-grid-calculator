@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lo Shu Grid Calculator</title>
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #4f46e5;
+            --background-color: #f9fafb;
+            --card-bg: #ffffff;
+            --text-color: #374151;
+            --border-color: #e5e7eb;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --hover-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            transition: box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+
+        .container:hover {
+            box-shadow: var(--hover-shadow);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 24px;
+            text-align: center;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 24px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .date-inputs {
+            display: flex;
+            gap: 10px;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: #f9fafb;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #resetBtn {
+            background: #f3f4f6;
+            color: var(--text-color);
+            margin-top: 15px;
+        }
+
+        .results {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .results h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .personality, .destiny {
+            background-color: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .personality span, .destiny span {
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        .grid-container {
+            margin-top: 30px;
+        }
+
+        .grid-title {
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .lo-shu-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 10px;
+            margin: 0 auto;
+            max-width: 280px;
+        }
+
+        .grid-cell {
+            aspect-ratio: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f3f4f6;
+            border-radius: 8px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .grid-cell.has-number {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .missing-numbers {
+            margin-top: 20px;
+            text-align: center;
+            padding: 15px;
+            background-color: #f3f4f6;
+            border-radius: 8px;
+        }
+
+        .error-message {
+            color: #ef4444;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                border-radius: 12px;
+            }
+            
+            .header {
+                padding: 20px;
+                border-radius: 12px 12px 0 0;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .lo-shu-grid {
+                max-width: 240px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Lo Shu Grid Calculator</h1>
+        </div>
+        <div class="content">
+            <div class="input-group">
+                <label for="dob">Enter Your Date of Birth</label>
+                <div class="date-inputs">
+                    <select id="day">
+                        <option value="" disabled selected>Day</option>
+                    </select>
+                    <select id="month">
+                        <option value="" disabled selected>Month</option>
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                    <select id="year">
+                        <option value="" disabled selected>Year</option>
+                    </select>
+                </div>
+                <div class="error-message" id="errorMessage">Please enter a valid date of birth</div>
+            </div>
+
+            <button id="calculateBtn">Generate Lo Shu Grid</button>
+            <button id="resetBtn">Reset</button>
+
+            <div class="results" id="results">
+                <div class="personality">
+                    <p>Personality Number:</p>
+                    <span id="personalityNumber">-</span>
+                </div>
+                <div class="destiny">
+                    <p>Destiny Number:</p>
+                    <span id="destinyNumber">-</span>
+                </div>
+
+                <div class="grid-container">
+                    <div class="grid-title">Your Lo Shu Grid:</div>
+                    <div class="lo-shu-grid" id="loShuGrid">
+                        <!-- Grid cells will be generated with JavaScript -->
+                    </div>
+                </div>
+
+                <div class="missing-numbers" id="missingNumbers">
+                    Numbers to be filled: -
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize selectors and DOM elements
+        const daySelect = document.getElementById('day');
+        const monthSelect = document.getElementById('month');
+        const yearSelect = document.getElementById('year');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const resultsContainer = document.getElementById('results');
+        const personalityNumber = document.getElementById('personalityNumber');
+        const destinyNumber = document.getElementById('destinyNumber');
+        const loShuGrid = document.getElementById('loShuGrid');
+        const missingNumbers = document.getElementById('missingNumbers');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Populate days dropdown
+        for (let i = 1; i <= 31; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            daySelect.appendChild(option);
+        }
+
+        // Populate years dropdown (1900 to current year)
+        const currentYear = new Date().getFullYear();
+        for (let i = currentYear; i >= 1900; i--) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            yearSelect.appendChild(option);
+        }
+
+        // Create the 3x3 grid cells
+        for (let i = 0; i < 9; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'grid-cell';
+            cell.dataset.position = i + 1;
+            loShuGrid.appendChild(cell);
+        }
+
+        // Add event listeners
+        calculateBtn.addEventListener('click', calculateLoShuGrid);
+        resetBtn.addEventListener('click', resetCalculator);
+
+        function calculateLoShuGrid() {
+            // Validate inputs
+            const day = parseInt(daySelect.value);
+            const month = parseInt(monthSelect.value);
+            const year = parseInt(yearSelect.value);
+
+            if (!day || !month || !year) {
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            // Hide error message if valid
+            errorMessage.style.display = 'none';
+
+            // Calculate personality number (day of birth)
+            let personality = calculateSingleDigit(day);
+            
+            // Calculate destiny number (full date)
+            const dateSum = calculateSingleDigit(day) + calculateSingleDigit(month) + calculateSingleDigit(year);
+            let destiny = calculateSingleDigit(dateSum);
+
+            // Update the display
+            personalityNumber.textContent = personality;
+            destinyNumber.textContent = destiny;
+
+            // Generate the Lo Shu Grid
+            generateGrid(day, month, year);
+
+            // Show results
+            resultsContainer.style.display = 'block';
+        }
+
+        function generateGrid(day, month, year) {
+            // Reset grid
+            const gridCells = document.querySelectorAll('.grid-cell');
+            gridCells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('has-number');
+            });
+
+            // Get all individual numbers from the date
+            const dateString = `${day}${month}${year}`;
+            const allNumbers = dateString.split('').map(Number);
+
+            // Count occurrences of each number (1-9)
+            const numberCounts = Array(10).fill(0);
+            for (const num of allNumbers) {
+                numberCounts[num]++;
+            }
+
+            // Map the Lo Shu Grid positions
+            // In the Lo Shu Grid:
+            // Position 4 corresponds to the number 1
+            // Position 9 corresponds to the number 2
+            // Position 2 corresponds to the number 3
+            // Position 3 corresponds to the number 4
+            // Position 5 corresponds to the number 5
+            // Position 7 corresponds to the number 6
+            // Position 8 corresponds to the number 7
+            // Position 1 corresponds to the number 8
+            // Position 6 corresponds to the number 9
+            
+            const loShuPositions = {
+                1: 4, // Top center
+                2: 9, // Right top
+                3: 2, // Top right
+                4: 3, // Middle left
+                5: 5, // Center
+                6: 7, // Middle right
+                7: 8, // Bottom left
+                8: 1, // Bottom center
+                9: 6  // Bottom right
+            };
+
+            // Fill the grid with the counts
+            for (let num = 1; num <= 9; num++) {
+                const position = loShuPositions[num];
+                const cell = document.querySelector(`.grid-cell[data-position="${position}"]`);
+                
+                if (numberCounts[num] > 0) {
+                    cell.textContent = numberCounts[num];
+                    cell.classList.add('has-number');
+                }
+            }
+
+            // Identify missing numbers
+            const missingNums = [];
+            for (let i = 1; i <= 9; i++) {
+                if (numberCounts[i] === 0) {
+                    missingNums.push(i);
+                }
+            }
+
+            // Update the missing numbers display
+            if (missingNums.length > 0) {
+                missingNumbers.textContent = `Numbers that are to be filled in Lo Shu Grid are: ${missingNums.join(',')}`;
+            } else {
+                missingNumbers.textContent = 'All numbers are present in your Lo Shu Grid!';
+            }
+        }
+
+        function calculateSingleDigit(number) {
+            // Reduce a number to a single digit by adding its digits
+            let sum = 0;
+            let num = number;
+            
+            // If the number is already a single digit, return it
+            if (num < 10) return num;
+            
+            // Convert to string to easily process digits
+            let numStr = num.toString();
+            
+            // Sum all digits
+            for (let i = 0; i < numStr.length; i++) {
+                sum += parseInt(numStr[i]);
+            }
+            
+            // Recursively reduce until we get a single digit
+            if (sum >= 10) {
+                return calculateSingleDigit(sum);
+            }
+            
+            return sum;
+        }
+
+        function resetCalculator() {
+            // Reset form values
+            daySelect.selectedIndex = 0;
+            monthSelect.selectedIndex = 0;
+            yearSelect.selectedIndex = 0;
+            
+            // Hide results and error
+            resultsContainer.style.display = 'none';
+            errorMessage.style.display = 'none';
+            
+            // Clear grid
+            const gridCells = document.querySelectorAll('.grid-cell');
+            gridCells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('has-number');
+            });
+        }
+    </script>
+</body>
+</html>
